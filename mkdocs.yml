@@ -23,7 +23,7 @@ plugins:
     - git-revision-date
     - mkdocs-jupyter:
           include_source: True
-          # execute: True
+          execute: True
           
 markdown_extensions:
     - attr_list
@@ -46,3 +46,6 @@ nav:
     - Report Issues: https://github.com/giswqs/geodemo/issues
     - API Reference:
           - geodemo module: geodemo.md
+    - Notebooks:
+          - notebooks/ipyleaflet_intro.ipynb 
+          - notebooks/folium_intro.ipynb
