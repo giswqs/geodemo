@@ -8,7 +8,7 @@
 
 
 -   Free software: MIT license
--   Documentation: <https://giswqs.github.io/geodemo>
+-   Documentation: <https://geodemo.gishub.org>
     
 
 ## Features
