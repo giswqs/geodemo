@@ -49,3 +49,4 @@ nav:
     - Notebooks:
           - notebooks/ipyleaflet_intro.ipynb 
           - notebooks/folium_intro.ipynb
+          - notebooks/geodemo_intro.ipynb
