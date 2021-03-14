@@ -46,6 +46,7 @@ nav:
     - Report Issues: https://github.com/giswqs/geodemo/issues
     - API Reference:
           - geodemo module: geodemo.md
+          - utils module: utils.md
     - Notebooks:
           - notebooks/ipyleaflet_intro.ipynb 
           - notebooks/folium_intro.ipynb
