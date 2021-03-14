@@ -51,3 +51,4 @@ nav:
           - notebooks/folium_intro.ipynb
           - notebooks/geodemo_intro.ipynb
           - notebooks/add_shapefile.ipynb
+          - notebooks/test_utils.ipynb

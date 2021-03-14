@@ -2,6 +2,7 @@
 import os
 import ipyleaflet
 from ipyleaflet import FullScreenControl, LayersControl, DrawControl, MeasureControl, ScaleControl, TileLayer
+from .utils import random_string
 
 class Map(ipyleaflet.Map):
 
@@ -55,6 +56,9 @@ class Map(ipyleaflet.Map):
     def add_geojson(self, in_geojson, style=None, layer_name="Untitled"):
 
         import json
+
+        if layer_name == "Untitled":
+            layer_name = "Untitled " + random_string()
 
         if isinstance(in_geojson, str):
 
