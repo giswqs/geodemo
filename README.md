@@ -13,6 +13,13 @@
 -   Free software: MIT license
 -   Documentation: https://giswqs.github.io/geodemo
     
+## Installation
+
+### conda
+
+```
+conda install geodemo -c conda-forage
+```
 
 ## Features
 
