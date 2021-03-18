@@ -18,7 +18,7 @@
 ### pip
 
 ```
-pip install geodem
+pip install -U geodemo
 ```
 
 ## How to publish a Python package on conda-forge
