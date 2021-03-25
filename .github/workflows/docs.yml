@@ -17,6 +17,10 @@ jobs:
                   pip install --user --no-cache-dir Cython
                   pip install --user -r requirements.txt
                   pip install --user .
+            - name: LOAD EE CREDENTIALS
+              run: python ./.github/ee_token.py
+              env:
+                  EARTHENGINE_TOKEN: ${{ secrets.EARTHENGINE_TOKEN }}
             - name: PKG-TEST
               run: |
                   python -m unittest discover tests/
