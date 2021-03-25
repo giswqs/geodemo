@@ -45,6 +45,7 @@ nav:
     - FAQ: faq.md
     - Report Issues: https://github.com/giswqs/geodemo/issues
     - API Reference:
+          - common module: common.md
           - geodemo module: geodemo.md
           - utils module: utils.md
     - Notebooks:
@@ -53,3 +54,4 @@ nav:
           - notebooks/geodemo_intro.ipynb
           - notebooks/add_shapefile.ipynb
           - notebooks/test_utils.ipynb
+          - notebooks/earthengine_intro.ipynb
