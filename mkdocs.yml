@@ -55,3 +55,4 @@ nav:
           - notebooks/add_shapefile.ipynb
           - notebooks/test_utils.ipynb
           - notebooks/earthengine_intro.ipynb
+          - notebooks/ipywidgets.ipynb
