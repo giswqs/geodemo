@@ -4,7 +4,7 @@ import ee
 import ipyleaflet
 from ipyleaflet import FullScreenControl, LayersControl, DrawControl, MeasureControl, ScaleControl, TileLayer
 from .utils import random_string
-from .common import ee_initialize
+from .common import ee_initialize, tool_template
 
 class Map(ipyleaflet.Map):
     """This Map class inherits the ipyleaflet Map class.
