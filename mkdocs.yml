@@ -59,4 +59,6 @@ nav:
           - notebooks/ipywidgets_box.ipynb
           - notebooks/ipywidgets_events.ipynb
           - notebooks/toolbar.ipynb
+          - notebooks/ipyfilechooser.ipynb
+
  
