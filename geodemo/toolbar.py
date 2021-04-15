@@ -38,7 +38,7 @@ def main_toolbar(m):
     cols = 2
     grid = widgets.GridspecLayout(rows, cols, grid_gap="0px", layout=widgets.Layout(width="62px"))
 
-    icons = ["folder-open", "map", "info", "question"]
+    icons = ["folder-open", "map", "gears", "question"]
 
     for i in range(rows):
         for j in range(cols):
@@ -97,6 +97,24 @@ def main_toolbar(m):
             if b.icon == "folder-open":
                 display(filechooser_widget)
                 m.add_control(output_ctrl)
+            elif b.icon == "gears":
+                import whiteboxgui.whiteboxgui as wbt
+
+                if hasattr(m, "whitebox") and m.whitebox is not None:
+                    if m.whitebox in m.controls:
+                        m.remove_control(m.whitebox)
+
+                tools_dict = wbt.get_wbt_dict()
+                wbt_toolbox = wbt.build_toolbox(
+                    tools_dict, max_width="800px", max_height="500px"
+                )
+
+                wbt_control = WidgetControl(
+                    widget=wbt_toolbox, position="bottomright"
+                )                
+
+                m.whitebox = wbt_control
+                m.add_control(wbt_control)
 
     for i in range(rows):
         for j in range(cols):
