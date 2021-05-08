@@ -6,6 +6,7 @@ import ee
 import ipywidgets as widgets
 from ipyleaflet import WidgetControl
 
+
 def ee_initialize(token_name="EARTHENGINE_TOKEN"):
     """Authenticates Earth Engine and initialize an Earth Engine session"""
     if ee.data._credentials is None:

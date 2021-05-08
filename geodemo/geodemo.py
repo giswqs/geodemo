@@ -2,17 +2,25 @@
 import os
 import ee
 import ipyleaflet
-from ipyleaflet import FullScreenControl, LayersControl, DrawControl, MeasureControl, ScaleControl, TileLayer
+from ipyleaflet import (
+    FullScreenControl,
+    LayersControl,
+    DrawControl,
+    MeasureControl,
+    ScaleControl,
+    TileLayer,
+)
 from .utils import random_string
 from .common import ee_initialize, tool_template
 from .toolbar import main_toolbar
+
 
 class Map(ipyleaflet.Map):
     """This Map class inherits the ipyleaflet Map class.
 
     Args:
         ipyleaflet (ipyleaflet.Map): An ipyleaflet map.
-    """    
+    """
 
     def __init__(self, **kwargs):
 
@@ -59,7 +67,7 @@ class Map(ipyleaflet.Map):
                 layer = TileLayer(
                     url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
                     attribution="Google",
-                    name="Google Satellite"
+                    name="Google Satellite",
                 )
                 self.add_layer(layer)
 
@@ -74,7 +82,7 @@ class Map(ipyleaflet.Map):
         Raises:
             FileNotFoundError: If the provided file path does not exist.
             TypeError: If the input geojson is not a str or dict.
-        """        
+        """
 
         import json
 
@@ -88,10 +96,10 @@ class Map(ipyleaflet.Map):
 
             with open(in_geojson) as f:
                 data = json.load(f)
-        
+
         elif isinstance(in_geojson, dict):
             data = in_geojson
-        
+
         else:
             raise TypeError("The input geojson must be a type of str or dict.")
 
@@ -107,7 +115,7 @@ class Map(ipyleaflet.Map):
             }
 
         geo_json = ipyleaflet.GeoJSON(data=data, style=style, name=layer_name)
-        self.add_layer(geo_json) 
+        self.add_layer(geo_json)
 
     def add_shapefile(self, in_shp, style=None, layer_name="Untitled"):
         """Adds a shapefile layer to the map.
@@ -119,6 +127,68 @@ class Map(ipyleaflet.Map):
         """
         geojson = shp_to_geojson(in_shp)
         self.add_geojson(geojson, style=style, layer_name=layer_name)
+
+    def add_points_from_csv(
+        self,
+        in_csv,
+        x="longitude",
+        y="latitude",
+        label=None,
+        layer_name="Marker cluster",
+    ):
+        """Adds points from a CSV file containing lat/lon information and display data on the map.
+
+        Args:
+            in_csv (str): The file path to the input CSV file.
+            x (str, optional): The name of the column containing longitude coordinates. Defaults to "longitude".
+            y (str, optional): The name of the column containing latitude coordinates. Defaults to "latitude".
+            label (str, optional): The name of the column containing label information to used for marker popup. Defaults to None.
+            layer_name (str, optional): The layer name to use. Defaults to "Marker cluster".
+
+        Raises:
+            FileNotFoundError: The specified input csv does not exist.
+            ValueError: The specified x column does not exist.
+            ValueError: The specified y column does not exist.
+            ValueError: The specified label column does not exist.
+        """
+        import pandas as pd
+        import ipywidgets as widgets
+        from ipyleaflet import Marker, MarkerCluster
+
+        if not os.path.exists(in_csv):
+            raise FileNotFoundError("The specified input csv does not exist.")
+
+        df = pd.read_csv(in_csv)
+        col_names = df.columns.values.tolist()
+
+        if x not in col_names:
+            raise ValueError(f"x must be one of the following: {', '.join(col_names)}")
+
+        if y not in col_names:
+            raise ValueError(f"y must be one of the following: {', '.join(col_names)}")
+
+        if label is not None and (label not in col_names):
+            raise ValueError(
+                f"label must be one of the following: {', '.join(col_names)}"
+            )
+
+        points = list(zip(df[y], df[x]))
+
+        self.default_style = {"cursor": "wait"}
+        if label is not None:
+            labels = df[label]
+            markers = [
+                Marker(
+                    location=point, draggable=False, popup=widgets.HTML(labels[index])
+                )
+                for index, point in enumerate(points)
+            ]
+        else:
+            markers = [Marker(location=point, draggable=False) for point in points]
+
+        marker_cluster = MarkerCluster(markers=markers, name=layer_name)
+        self.add_layer(marker_cluster)
+        self.default_style = {"cursor": "default"}
 
     def add_ee_layer(
         self, ee_object, vis_params={}, name=None, shown=True, opacity=1.0
@@ -170,7 +240,93 @@ def shp_to_geojson(in_shp, out_geojson=None):
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
         with open(out_geojson, "w") as f:
-            f.write(json.dumps(geojson))    
+            f.write(json.dumps(geojson))
+
+
+def csv_to_shp(in_csv, out_shp, x="longitude", y="latitude"):
+    """Creates points for a CSV file and exports data as a shapefile.
+
+    Args:
+        in_csv (str): The file path to the input CSV file.
+        out_shp (str): The file path to the exported shapefile.
+        x (str, optional): The name of the column containing longitude coordinates. Defaults to "longitude".
+        y (str, optional): The name of the column containing latitude coordinates. Defaults to "latitude".
+
+    Raises:
+        FileNotFoundError: The specified input csv does not exist.
+        ValueError: The specified x column does not exist.
+        ValueError: The specified y column does not exist.
+        ValueError: The specified label column does not exist.
+    """
+    import pandas as pd
+    import geopandas as gpd
+
+    if not os.path.exists(in_csv):
+        raise FileNotFoundError("The input csv does not exist.")
+
+    if not out_shp.lower().endswith(".shp"):
+        raise ValueError("out_shp must be a shapefile ending with .shp")
+
+    out_dir = os.path.dirname(out_shp)
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    df = pd.read_csv(in_csv)
+    col_names = df.columns.values.tolist()
+
+    if x not in col_names:
+        raise ValueError(f"x must be one of the following: {', '.join(col_names)}")
+
+    if y not in col_names:
+        raise ValueError(f"y must be one of the following: {', '.join(col_names)}")
+
+    gdf = gpd.GeoDataFrame(
+        df, crs="epsg:4326", geometry=gpd.points_from_xy(df[x], df[y])
+    )
+    gdf.to_file(out_shp)
+
+
+def csv_to_geojson(in_csv, out_geojson, x="longitude", y="latitude"):
+    """Creates points for a CSV file and exports data as a GeoJSON.
+
+    Args:
+        in_csv (str): The file path to the input CSV file.
+        out_geojson (str): The file path to the exported GeoJSON.
+        x (str, optional): The name of the column containing longitude coordinates. Defaults to "longitude".
+        y (str, optional): The name of the column containing latitude coordinates. Defaults to "latitude".
+
+    Raises:
+        FileNotFoundError: The specified input csv does not exist.
+        ValueError: The specified x column does not exist.
+        ValueError: The specified y column does not exist.
+        ValueError: The specified label column does not exist.
+    """
+    import pandas as pd
+    import geopandas as gpd
+
+    if not os.path.exists(in_csv):
+        raise FileNotFoundError("The input csv does not exist.")
+
+    if not out_geojson.lower().endswith(".geojson"):
+        raise ValueError("out_geojson must have the .geojson file extension.")
+
+    out_dir = os.path.dirname(out_geojson)
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    df = pd.read_csv(in_csv)
+    col_names = df.columns.values.tolist()
+
+    if x not in col_names:
+        raise ValueError(f"x must be one of the following: {', '.join(col_names)}")
+
+    if y not in col_names:
+        raise ValueError(f"y must be one of the following: {', '.join(col_names)}")
+
+    gdf = gpd.GeoDataFrame(
+        df, crs="epsg:4326", geometry=gpd.points_from_xy(df[x], df[y])
+    )
+    gdf.to_file(out_geojson, driver="GeoJSON")
 
 
 def ee_tile_layer(
@@ -236,7 +392,3 @@ def ee_tile_layer(
         visible=shown,
     )
     return tile_layer
-
-
-
-
